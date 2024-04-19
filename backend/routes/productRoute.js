@@ -13,7 +13,7 @@ import { isAuthenticatedUser, authenticatedRoles } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/product", isAuthenticatedUser, getAllProducts);
+router.get("/products", getAllProducts);
 router.get("/product/:id", getProductDetails);
 router.post(
   "/admin/product/new",

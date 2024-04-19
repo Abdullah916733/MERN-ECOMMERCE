@@ -2,16 +2,30 @@ import Products from "../models/productModel.js";
 import { ApiFeatures } from "../utils/apiFeatures.js";
 
 // GET ALL PRODUCT
-export const getAllProducts = async (req, res) => {
+export const getAllProducts = async (req, res, next) => {
   try {
-    const resultPerPage = 2;
+    const resultPerPage = 8;
     const productCount = await Products.countDocuments();
     const apiFeature = new ApiFeatures(Products.find(), req.query)
       .search()
       .filter()
       .pagination(resultPerPage);
     const products = await apiFeature.query;
-    res.status(200).json({ success: true, products, productCount });
+
+    const apiFeatureFilter = new ApiFeatures(Products.find(), req.query)
+      .search()
+      .filter();
+    const productsFilter = await apiFeatureFilter.query;
+
+    let filterProductCount = productsFilter.length;
+
+    res.status(200).json({
+      success: true,
+      products,
+      productCount,
+      resultPerPage,
+      filterProductCount,
+    });
   } catch (error) {
     res.status(400).json({ message: error });
   }
