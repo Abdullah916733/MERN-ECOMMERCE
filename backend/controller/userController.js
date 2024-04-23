@@ -2,9 +2,16 @@ import User from "../models/userModel.js";
 import sendToken from "../utils/jwtToken.js";
 import sendEmail from "../utils/sendEmail.js";
 import crypto from "crypto";
+import cloudinary from "cloudinary";
 
 // REGISTER USER
 export const registerUser = async (req, res, next) => {
+  const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+    folder: "avatars",
+    width: 150,
+    crop: "scale",
+  });
+
   const { name, email, password } = req.body;
   try {
     const user = await User.create({
@@ -12,8 +19,8 @@ export const registerUser = async (req, res, next) => {
       email,
       password,
       avatar: {
-        public_id: "sample id",
-        url: "profile Url.",
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
       },
     });
 
@@ -189,10 +196,27 @@ export const updateProfile = async (req, res, next) => {
       name: req.body.name,
       email: req.body.email,
     };
+
+    if (req.body.avatar !== "") {
+      const user = await User.findById(req.user.id);
+      await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+
+      const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+        folder: "avatars",
+        width: 150,
+        crop: "scale",
+      });
+
+      newData.avatar = {
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
+      };
+    }
+
     const user = await User.findByIdAndUpdate(req.user.id, newData, {
       new: true,
     });
-    res.status(200).json({ message: true, user });
+    res.status(200).json({ success: true, user });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -246,12 +270,10 @@ export const deleteUser = async (req, res, next) => {
     const user = await User.findById(req.params.id);
 
     if (!user)
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `User does not exist with id:-${req.params.id}`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `User does not exist with id:-${req.params.id}`,
+      });
 
     await User.findByIdAndDelete(req.params.id);
     res
@@ -261,4 +283,3 @@ export const deleteUser = async (req, res, next) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
