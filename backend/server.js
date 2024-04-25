@@ -1,5 +1,5 @@
-import app from "./app.js";
 import dotenv from "dotenv";
+import app from "./app.js";
 import connectDatabase from "./config/database.js";
 import cloudinary from 'cloudinary';
 
@@ -7,7 +7,6 @@ import cloudinary from 'cloudinary';
 process.on("unhandledRejection", (err) => {
   console.log(`Error : ${err.message}`);
   console.log(`Shuting down server due to unhandled promise rejection.`);
-
   process.exit(1);
 });
 

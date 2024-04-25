@@ -86,7 +86,7 @@ export const updateOrder = async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "Order not found with this Id." });
     if (order.status === "Delivered") {
-      res
+     return  res
         .status(400)
         .json({ success: false, message: "Product already delivered." });
     }
@@ -115,7 +115,7 @@ export const deleteOrder = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order)
-      res.status(404).json({ success: false, message: "Order not found." });
+    return  res.status(404).json({ success: false, message: "Order not found." });
     await Order.findByIdAndDelete(req.params.id);
     res
       .status(200)

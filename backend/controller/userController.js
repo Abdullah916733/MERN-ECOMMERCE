@@ -79,17 +79,17 @@ export const forgotPassword = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      res.status(404).json({ success: false, message: "Email not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Email not found." });
     }
     const resetToken = user.getResetPasswordToken();
 
     await user.save({ validateBeforeSave: false });
 
-    const resetPasswordUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/v1/password/reset/${resetToken}`;
+    const resetPasswordUrl = `${process.env.LOCAL_HOST_PORT}/password/reset/${resetToken}`;
 
-    const message = `Your reset password token is:- \n\n${resetPasswordUrl}\n\nIf your have not requested then please ignore it.`;
+    const message = `Your reset password token is:-\n\n${resetPasswordUrl}\n\nIf your have not requested then please ignore it.`;
 
     try {
       await sendEmail({
@@ -97,7 +97,7 @@ export const forgotPassword = async (req, res, next) => {
         subject: "Ecommerce Password Recovery",
         message,
       });
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: `Email sent to ${user.email} successfully.`,
       });
@@ -105,10 +105,10 @@ export const forgotPassword = async (req, res, next) => {
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
       await user.save({ validateBeforeSave: false });
-      res.status(500).json({ success: false, message: error.message });
+      return res.status(500).json({ success: false, message: error.message });
     }
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -168,16 +168,18 @@ export const updateUserPassword = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).select("+password");
     if (!user) {
-      res.status(400).json({ success: false, message: "User does not exist." });
+      return res
+        .status(400)
+        .json({ success: false, message: "User does not exist." });
     }
     const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
     if (!isPasswordMatched) {
-      res
+      return res
         .status(400)
         .json({ success: false, message: "Old password is incorrect." });
     }
     if (req.body.newPassword !== req.body.confirmPassword) {
-      res
+      return res
         .status(400)
         .json({ success: false, message: "Password does not match" });
     }

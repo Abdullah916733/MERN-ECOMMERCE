@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearError, getProductDetails } from "../../actions/productAction";
 import { useParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import Carousel from "react-material-ui-carousel";
 import "./ProductDetails.css";
 import { useAlert } from "react-alert";
 import ReactStars from "react-rating-stars-component";
+import { addToCart } from "../../actions/cartAction.js";
 
 const ProductDetails = () => {
   const dispatch = useDispatch();
@@ -18,10 +19,27 @@ const ProductDetails = () => {
   );
   const alert = useAlert();
 
+  const [quantity, setQuantity] = useState(1);
+
   const options = {
     value: product?.ratings,
     readOnly: true,
     precision: 0.5,
+  };
+
+  const increaseQuantity = () => {
+    if (quantity >= product.stock) return;
+    setQuantity(quantity + 1);
+  };
+
+  const decreaseQuantity = () => {
+    if (quantity <= 1) return;
+    setQuantity(quantity - 1);
+  };
+
+  const addToCartHandler = () => {
+    dispatch(addToCart(id, quantity));
+    alert.success("Item Added To Cart");
   };
 
   useEffect(() => {
@@ -71,11 +89,14 @@ const ProductDetails = () => {
                   <h1>{`₹${product.price}`}</h1>
                   <div className="detailsBlock-3-1">
                     <div className="detailsBlock-3-1-1">
-                      <button>-</button>
-                      <input readOnly type="number" value={0} />
-                      <button>+</button>
+                      <button onClick={decreaseQuantity}>-</button>
+                      <input readOnly type="number" value={quantity} />
+                      <button onClick={increaseQuantity}>+</button>
                     </div>
-                    <button disabled={product.Stock < 1 ? true : false}>
+                    <button
+                      disabled={product.stock < 1 ? true : false}
+                      onClick={addToCartHandler}
+                    >
                       Add to Cart
                     </button>
                   </div>
@@ -83,9 +104,9 @@ const ProductDetails = () => {
                   <p>
                     Status:
                     <b
-                      className={product.Stock < 1 ? "redColor" : "greenColor"}
+                      className={product.stock < 1 ? "redColor" : "greenColor"}
                     >
-                      {product.Stock < 1 ? "OutOfStock" : "InStock"}
+                      {product.stock < 1 ? "OutOfStock" : "InStock"}
                     </b>
                   </p>
                 </div>
