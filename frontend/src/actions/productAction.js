@@ -8,11 +8,14 @@ import {
   PRODUCT_DETAILS_SUCCESS,
   PRODUCT_DETAILS_FAIL,
   CLEAR_ERROR,
+  NEW_REVIEW_REQUEST,
+  NEW_REVIEW_SUCCESS,
+  NEW_REVIEW_FAIL,
 } from "../constants/productConstants";
 
 // GET ALL PRODUCTS
 export const getProducts =
-  (keyword = "", currentPage = 1, price = [0, 25000], category, ratings=0) =>
+  (keyword = "", currentPage = 1, price = [0, 25000], category, ratings = 0) =>
   async (dispatch) => {
     try {
       dispatch({ type: ALL_PRODUCT_REQUEST });
@@ -39,6 +42,21 @@ export const getProductDetails = (id) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_DETAILS_FAIL,
+      payload: error.response.data.message,
+    });
+  }
+};
+
+// CREATE AND UPDATE REVIEW
+export const newReview = (formData) => async (dispatch) => {
+  try {
+    dispatch({ type: NEW_REVIEW_REQUEST });
+    const config = { headers: { "Content-Type": "application/json" } };
+    const { data } = await axios.patch(`/api/v1/review`, formData, config);
+    dispatch({ type: NEW_REVIEW_SUCCESS, payload: data.success });
+  } catch (error) {
+    dispatch({
+      type: NEW_REVIEW_FAIL,
       payload: error.response.data.message,
     });
   }

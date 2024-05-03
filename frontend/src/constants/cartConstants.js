@@ -3,3 +3,4 @@ export const ADD_TO_CART = "ADD_TO_CART";
 export const REMOVE_TO_CART_ITEMS = "REMOVE_TO_CART_ITEMS";
 
 export const ADD_SHIPPING_INFO = "ADD_SHIPPING_INFO";
+
